@@ -1,0 +1,18 @@
+:root {
+
+  --headerBgColor: rgb(48, 49, 51);
+
+  --borderColor: rgba(50, 50, 50, 1);
+
+  /*字体样式*/  
+  --fontColor: #000000;
+  --fontSize: 16px;
+
+}
+
+.el-divider{
+  background-color: var(--headerBgColor)
+}
+.el-divider--horizontal{
+  margin-top: 0;
+}
