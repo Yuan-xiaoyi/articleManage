@@ -3,7 +3,9 @@
     <!--  不然绝粒升天衢，不然鸣珂游帝都。 ——【唐】李泌 -->
     『 {{footJson.hitokoto}} 』 —— 《{{footJson.creator}}》
     <i class="el-icon-refresh-right" @click="getFooterJson"
-      style="cursor: pointer;  font-weight: 600; font-size: 18px;"></i>
+      style="cursor: pointer;  font-weight: 600; font-size: 18px;
+             float: right;line-height: 50px;margin-right: 16px;"
+    ></i>
   </div>
 </template>
 

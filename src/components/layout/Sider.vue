@@ -38,7 +38,8 @@
     <el-menu
       background-color="#545c64"
       text-color="#fff"
-      active-text-color="#ffd04b">
+      active-text-color="#ffd04b"
+    >
 
       <div v-for="(item,index) in list" :key="index">
         <el-submenu
@@ -143,8 +144,36 @@ export default {
         // },{
           index: 'a_4',
           icon: 'el-icon-location',
-          title: '所有单子（管理员可视）',
-          view: 'dispatcher/sentOrders',
+          title: '我的单子',
+          children: [
+            {
+              index: '4-1',
+              title: '待接单',
+              view: 'dispatcher/admin_forOrder'
+            },{
+              index: '4-2',
+              title: '未初稿',
+              view: 'dispatcher/admin_unFinished'
+            },{
+              index: '4-3',
+              title: '修改中',
+              view: 'dispatcher/admin_forModify'
+            },
+            {
+              index: '4-4',
+              title: '待确认',
+              view: 'dispatcher/admin_forConfirm'
+            },
+            {
+              index: '4-5',
+              title: '已确认',
+              view: 'dispatcher/admin_hasCompleted'
+            },{
+              index: '4-6',
+              title: '全部订单',
+              view: 'dispatcher/admin_allOrders',
+            },
+          ],
           limits:['admin']
         },{
           index: 't_1',
@@ -164,6 +193,12 @@ export default {
         this.list.push(item)
       }
     })
+    if(this.list.length > 0){
+      this.choose(this.list[0])
+      // this.$nextTick(() => {
+      //   document.getElementsByClassName("el-menu-item")[0].className += " is-active"
+      // })
+    }
   },
   methods: {
     choose(item){

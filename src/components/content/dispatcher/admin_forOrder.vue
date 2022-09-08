@@ -22,8 +22,9 @@
 import ySearch from "../public/ySearch.vue"
 import yTable from "../public/yTable.vue"
 import api_Order from "../../../api/order"
+import api_User from "../../../api/user"
 export default {
-  name: 'hasCompleted',
+  name: 'admin_forConfirm',
   components: {
     ySearch, yTable
   },
@@ -31,6 +32,11 @@ export default {
     return{
       serchFeilds: [
         {
+          type: 'nameSelect',
+          label: '管理员名',
+          prop: 'create_user',
+          options: []
+        },{
           type: 'input',
           label: '订单名称',
           prop: 'title',
@@ -72,6 +78,18 @@ export default {
           label: '备注',
           prop: "remark",
         },{
+          label: '交易价格(元)',
+          prop: "price",
+          width: 50
+        },{
+          label: '写手应收(元)',
+          prop: "money",
+          width: 50
+        },{
+          label: '稿件来源',
+          prop: "source",
+          width: 50
+        },{
           type: "link",
           label: '详情',
           prop: "detail",
@@ -82,19 +100,30 @@ export default {
         }
       ],
       tableData: [],
-      user_id: '',
       searchParam: {},
       // currentPage: 1,
       // pagesize: 20,
     }
   },
   created(){
-    let userInfo = this.$cookie.get('userInfo') && JSON.parse(this.$cookie.get('userInfo'))
-    this.user_id = userInfo.userId
+    api_User.getUserList().then(res => {
+      let managerList = res.page.list.map(e => {
+        if(e.role == "admin"){
+          return {
+            username: e.username,
+            value: e.username
+          }
+        }
+      })
+      managerList = managerList.filter(ele=>{return ele!=undefined})
+      this.serchFeilds[0].options = [{value: '',username: '所有管理员'}, ...managerList]
+    }).catch(e => {
+      this.$message.error(e.msg)
+    })
   },
   methods: {
     getSearch(order){
-      this.searchParam = {user_id: this.user_id, status: 6}
+      this.searchParam = {status: 2}
       for (let key in order) {
         if (Object.hasOwnProperty.call(order, key)) {
           let element = order[key];

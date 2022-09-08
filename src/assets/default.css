@@ -10,6 +10,14 @@
 
 }
 
+.el-dialog__header{
+  border-bottom: 1px solid var(--borderColor);
+}
+.el-dialog__body{
+  padding: 20px;
+}
+
+
 .el-divider{
   background-color: var(--headerBgColor)
 }

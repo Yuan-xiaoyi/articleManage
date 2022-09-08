@@ -1,44 +1,32 @@
 <template>
   <div style="height: 100%; overflow: auto;">
-    <el-row>
-      <el-col v-for="(item, index) in colPages" :key="index" :sm="12" :lg="6">
-        <div @click="goto('sad')" class="item">
-          <i class="icon" :class="item.icon"></i>
-          <div class="title">{{item.title}}</div>
-          <div class="subTitle">{{item.subTitle}}</div>
-        </div>
-      </el-col>
-      <el-col :sm="12" :lg="6">
-        <el-result icon="warning" title=""
-        subTitle="请根据提示进行操作">
-        </el-result>
-      </el-col>
-      <el-col :sm="12" :lg="6">
-        <el-result icon="error" title="" subTitle="请根据提示进行操作">
-        </el-result>
-      </el-col>
-      <el-col :sm="12" :lg="6">
-        <el-result icon="info" title="" subTitle="请根据提示进行操作">
-        </el-result>
-      </el-col>
-    </el-row>
+    <div v-if="!showDetail" style="width:100%;height: 100%">
+      <el-row>
+        <el-col v-for="(item, index) in colPages" :key="index" :sm="12" :lg="6">
+          <div @click="goto(item)" class="item">
+            <img :src="item.imgUrl" alt="" class="img" />
+            <div class="title">{{item.title}}</div>
+            <div class="subTitle">{{item.subTitle}}</div>
+          </div>
+        </el-col>
+      </el-row>
 
-    <el-table        
-      :data="allOrderData"
-      height="calc(100% - 96px)"
-    >
-      <el-table-column
-        prop="date"
-        label="日期">
-      </el-table-column>
-      <el-table-column
-        prop="name"
-        label="姓名">
-      </el-table-column>
-    </el-table>
-
-    <div style="width:100%;height: 1000px">
-      <el-page-header @back="goBack" content="详情页面"></el-page-header>
+      <el-table        
+        :data="allOrderData"
+        height="calc(100% - 96px)"
+      >
+        <el-table-column
+          prop="date"
+          label="日期">
+        </el-table-column>
+        <el-table-column
+          prop="name"
+          label="姓名">
+        </el-table-column>
+      </el-table>
+    </div>
+    <div v-else style="width:100%">
+      <el-page-header @back="goBack" :content="detailTitle"></el-page-header>
       <div>
         <component :is="componentName" ></component>
       </div>
@@ -51,27 +39,29 @@ export default {
   name: 'screenOfTotal',
   data(){
     return{
+      showDetail: false,
+      detailTitle: '详情页面',
       colPages:[
         {
-          icon: "el-icon-user-solid",
+          imgUrl: require("../../../assets/totalScreen/searchWriters.png"),
           title: "查看写手",
-          subTitle: "查看写手近期交付详情",
-          page: ""
+          subTitle: "查看写手近期交付详情并进行结算",
+          page: "searchWriters"
         },{
-          icon: "el-icon-user-solid",
-          title: "注册新人",
-          subTitle: "查看写手近期交付详情",
-          page: ""
-        },{
-          icon: "el-icon-user-solid",
-          title: "发布公告",
-          subTitle: "查看写手近期交付详情",
-          page: ""
-        },{
-          icon: "el-icon-user-solid",
+          imgUrl: require("../../../assets/totalScreen/createOrder.png"),
           title: "创建新单",
-          subTitle: "查看写手近期交付详情",
-          page: ""
+          subTitle: "创建订单需求并派发",
+          page: "createOrder"
+        },{
+          imgUrl: require("../../../assets/totalScreen/addMember.png"),
+          title: "注册新人",
+          subTitle: "注册写手或其他身份成员",
+          page: "register"
+        },{
+          imgUrl: require("../../../assets/totalScreen/notice.png"),
+          title: "发布公告",
+          subTitle: "发布近期公告",
+          page: "notice"
         }
       ],
       allOrderData: [
@@ -89,11 +79,13 @@ export default {
     }
   },
   methods:{
-    goto(str){
-      this.componentName = () => import(`../../content/dispatcher/${str}`)
+    goto(item){
+      this.componentName = () => import(`../../content/dispatcher/${item.page}`)
+      this.detailTitle = item.title
+      this.showDetail = !this.showDetail
     },
     goBack(){
-
+      this.showDetail = false
     }
   }
 }
@@ -108,8 +100,13 @@ export default {
   text-align: center;
   box-sizing: border-box;
   padding: 40px 30px;
+  cursor: pointer;
 }
-.icon{
+.item:hover .img{
+  transform: scale(1.2,1.2);
+	transition: all 1s;
+}
+.img{
   width: 64px;
   height: 64px;
 }
@@ -124,5 +121,13 @@ export default {
   font-size: 14px;
   color: #606266;
   line-height: 1.3;
+}
+.el-page-header__content{
+  font-size: 18px;
+  color: #303133;
+  font-weight: bold;
+}
+.el-page-header {
+  margin: 10px 0px 20px;
 }
 </style>

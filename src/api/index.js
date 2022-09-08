@@ -7,7 +7,7 @@ const instance = axios.create({
     baseURL: config.BASE_URL,
     //超时时间，根据项目需求，决定是否启用
     //如有文件上传需求，建议设置大一些 或 另外创建一个axios实例 负责文件上传
-    timeout: 1000 * 60 
+    timeout: 1000 * 60,
 });
  
 //如有需要，可在请求发起之前，做拦截处理

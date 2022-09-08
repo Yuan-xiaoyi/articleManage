@@ -1,30 +1,27 @@
 <template>
   <div style="height: 100%; overflow: auto;">
-    <h3>创建新单</h3>
-    
-    <el-form ref="form"  :model="form" label-width="80px" class="form">
-      <el-form-item label="稿件名" prop="name">
-        <el-input v-model="form.name"></el-input>
+    <el-form ref="form" :rules="rules" :model="form" label-width="120px" class="form">
+      <el-form-item label="稿件名" prop="title">
+        <el-input v-model="form.title"></el-input>
       </el-form-item>
       <el-form-item label="字数" prop="wordsNum">
         <el-input
           v-model="form.wordsNum"
-          type="number"
           min="0"
-          max="999999"
           onKeypress="return (/[\d]/.test(String.fromCharCode(event.keyCode)))"
           class="numberInput"
         ></el-input>
       </el-form-item>
-      <el-form-item label="交稿时间" prop="submitDate">
+      <el-form-item label="交稿时间" prop="finishDate">
         <el-date-picker
-          v-model="form.submitDate"
+          v-model="form.finishDate"
           type="date"
-          placeholder="选择日期">
-        </el-date-picker>
+          placeholder="选择日期"
+          value-format="yyyy-MM-dd"
+        ></el-date-picker>
       </el-form-item>
       <el-form-item label="备注" prop="textarea">
-        <el-input v-model="form.textarea" type="textarea" :rows="2"></el-input>
+        <el-input v-model="form.textarea" type="textarea" :rows="6"></el-input>
       </el-form-item>
       <el-form-item label="需求文档" prop="textarea">
         <el-upload
@@ -46,12 +43,23 @@
           <div slot="tip" class="el-upload__tip">只能上传doc/docx/pdf文件</div>
         </el-upload>
       </el-form-item>
-      <el-form-item label="派单至" prop="textarea">
+      <el-form-item label="订单价格(元)" prop="orderPrice">
+        <el-input v-model="form.orderPrice" type="number" min="0"
+          onKeypress="return (/[\d]/.test(String.fromCharCode(event.keyCode)))"></el-input>
+      </el-form-item>
+      <el-form-item label="派给写手价格(元)" prop="writerMoney">
+        <el-input v-model="form.writerMoney" type="number" min="0"
+          onKeypress="return (/[\d]/.test(String.fromCharCode(event.keyCode)))"></el-input>
+      </el-form-item>
+      <el-form-item label="订单来源" prop="orderSource">
+        <el-input v-model="form.orderSource"></el-input>
+      </el-form-item>
+      <el-form-item label="派单至" prop="writer">
         <el-select v-model="form.writer" placeholder="" filterable :filter-method="dataFilter" clearable>
           <el-option
             v-for="(writer,index) in options" :key="index"
             :label="writer.username"
-            :value="writer.username"
+            :value="writer.userId"
           ></el-option>
         </el-select>
       </el-form-item>
@@ -64,18 +72,41 @@
 </template>
 
 <script>
-import api from "../../../api/demo/user"
+import api_File from "../../../api/file"
+import api_Order from "../../../api/order"
+import api_User from "../../../api/user"
 export default {
   name:"createOrder",
   data(){
     return{
       form: {
-        name: '',
-        wordsNum: '',
-        submitDate: '',
+        title: '',
+        wordsNum: 0,
+        finishDate: '',
         textarea: '',
-        file: '',
+        // file: '',
+        orderPrice: 0,
+        writerMoney: 0,
+        orderSource: '',
         writer: ''
+      },
+      rules:{
+        title: [
+          { required: true, message: '请输入稿件名', trigger: 'blur' }
+        ],
+        wordsNum: [
+          { required: true, message: '请输入稿件要求字数', trigger: 'blur' },
+          {"pattern": /^[0-9]*$/,"message": "只能输入正整数"}
+        ],
+        finishDate: [
+          { required: true, message: '请选择交稿日期', trigger: 'change' }
+        ],
+        orderPrice: [
+          { required: true, message: '请输入订单价格', trigger: 'blur' }
+        ],
+        writerMoney: [
+          { required: true, message: '请输入派给写手价格', trigger: 'blur' }
+        ]
       },
       options: [],
       writerList: [],
@@ -84,18 +115,80 @@ export default {
   },
   created(){
     let param = {"page":1 ,"limit": 10000000000}
-    api.getUserList(param).then(res => {
-      this.writerList = res.page.list
-      this.options = [{value: '',username: '所有写手'}, ...this.writerList]
+    this.$set(this.form, "finishDate", this.getNowTime());
+    api_User.getUserList(param).then(res => {
+      this.writerList = res.page.list.map(e => {
+        let item = JSON.parse(JSON.stringify(e))
+        this.$set(item, "value", e.username)
+        if(item.role == "writer" && item.status == 1){
+          return item
+        }
+      })
+      this.writerList = this.writerList.filter(ele=>{return ele!=undefined})
+      this.options = [{userId: '',username: '所有写手'}, ...this.writerList]
+      console.log(this.options)
     }).catch(e => {
       this.$message.error(e.msg)
     })
   },
   methods: {
+    getNowTime() {
+      let now = new Date();
+      let year = now.getFullYear(); //得到年份
+      let month = now.getMonth(); //得到月份
+      let date = now.getDate(); //得到日期
+      month = month + 1;
+      month = month.toString().padStart(2, "0");
+      date = date.toString().padStart(2, "0");
+      return `${year}-${month}-${date}`;
+    },
     onSubmit(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          console.log(this.form, this.fileList)
+          
+          let param = {
+            userId: this.form.writer,
+            title: this.form.title,
+            wordsnum: this.form.wordsNum,
+            deadline: this.form.finishDate,
+            remark: this.form.textarea,
+            price: parseInt(this.form.orderPrice),
+            source: this.form.orderSource,
+            money: parseInt(this.form.writerMoney),
+            status: 2
+          }
+          // param.finishDate = this.$filter.formatDate(param.finishDate)
+
+          // 创建订单记录
+          api_Order.createOrder(param).then(res => {
+            let param2 = {
+              order_id: res.id,
+              text: param.title
+            }
+            // 新增文件记录(传入order_id)
+            api_File.addFileDetail(param2).then(result => {
+              // 有文件，成功后调用文件上传接口
+              if(this.fileList.length > 0){
+                let formData = new FormData();
+                formData.append("file", this.fileList[0]);
+                api_File.uploadOrderFile({id: result.id, formData: formData}).then(() => {
+                  this.$message.success("创建并已成功派单！")
+                }).catch(error => {
+                  this.$message.error(error.msg)
+                  // 上传文件失败则要删除订单 和 文件记录
+                  api_Order.deleteOrder([res.id]).then({})
+                })
+              }else{
+                this.$message.success("创建并已成功派单！")
+              }
+            }).catch(er => {
+              this.$message.error(er.msg)
+              // 新增文件记录失败则要删除订单
+              api_Order.deleteOrder([res.id]).then({})
+            })
+          }).catch(e => {
+            this.$message.error(e.msg)
+          })
         } else {
           return false;
         }
@@ -111,13 +204,17 @@ export default {
         this.options = this.writerList.filter(item => {
           if(!!~item.username.indexOf(val) || !!~item.username.toUpperCase().indexOf(val.toUpperCase())){
             return true
+          }else{
+            this.form.writer = ""
+            this.options = [{userId: '',username: '所有写手'}, ...this.writerList]
           }
         })
       }else{
-        this.options = [{value: '',username: '所有写手'}, ...this.writerList]
+        this.options = [{userId: '',username: '所有写手'}, ...this.writerList]
       }
     },
-    
+
+    // 上传五连
     uploadMehod(params){
       console.log('http-request', params);
       this.fileList[0] = params.file
@@ -133,22 +230,25 @@ export default {
       const isDocx = file.name.split('.')[1] === 'docx'
       const isDoc = file.name.split('.')[1]==='doc'
       const isPdf = file.name.split('.')[1]==='pdf'
+      const isZip = file.name.split('.')[1]==='zip'
+      const isRar = file.name.split('.')[1]==='rar'
 
-      if (!isDocx && !isDoc && !isPdf) {
-        this.$message.error('上传文档只能是 doc/docx/pdf 格式!');
+      if (!isDocx && !isDoc && !isPdf && !isZip && !isRar) {
+        this.$message.error('上传文档只能是 doc/docx/pdf/zip/rar 格式!');
       }
-      return isDocx || isDoc || isPdf;
+      return isDocx || isDoc || isPdf || isZip || isRar;
     },
     handleExceed(files, fileList) {
       console.log('on-exceed', files, fileList)
       this.$message.warning(`当前限制上传 1 个文件，请删除后再上传`);
     },
     handleSuccess(res, file) {
+      console.log(res,file)
       this.fileList = URL.createObjectURL(file.raw);
     },
     beforeRemove(file) {
-      console.log('before-remove', file)
-      // return this.$confirm(`确定移除 ${ file.name }？`);
+      console.log(file)
+      this.fileList = []
     }
   }
 }

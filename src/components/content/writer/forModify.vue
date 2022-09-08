@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="height: 100%;overflow: auto;">
     <y-search
       :serchFeilds="serchFeilds"
       @getSearch="getSearch"
@@ -11,16 +11,17 @@
       :tableFeilds="tableFeilds"
       :tableData="tableData"
       @rowOperation="rowOperation"
-      style="height: calc(100vh - 242px); overflow: hidden"
+      @getNewOrder="getNewOrder"
+      style="height: calc(100vh - 235px); overflow: hidden"
     ></y-table>
-
+    <!--@pageOperation="pageOperation"-->
   </div>
 </template>
 
 <script>
 import ySearch from "../public/ySearch.vue"
 import yTable from "../public/yTable.vue"
-import api from "../../../api/demo/order"
+import api_Order from "../../../api/order"
 export default {
   name: 'forModify',
   components: {
@@ -32,29 +33,18 @@ export default {
         {
           type: 'input',
           label: '订单名称',
-          prop: 'orderName',
+          prop: 'title',
         },{
           type: 'select',
           label: '结算情况',
-          prop: 'payStatus',
-          options: [
-            {
-              label: '全部',
-              value: ''
-            },{
-              label: '待结算',
-              value: '0'
-            },{
-              label: '已结算',
-              value: '1'
-            }
-          ]
+          prop: 'settlement',
+          options: this.$store.state.orderStatus.settlement
         }
       ],
       tableFeilds: [
         {
-          type: "status&btn",
-          label: '状态',
+          type: "status",
+          label: '订单状态',
           prop: "status",
           width: 50,
 
@@ -63,47 +53,62 @@ export default {
           btnEvent: 'upload'
         },{
           label: '稿件名',
-          prop: "name"
+          prop: "title"
         },{
           label: '字数',
-          prop: "wordsNum",
+          prop: "wordsnum",
           width: 50
         },{
           label: '交稿时间',
-          prop: "submitDate",
+          prop: "deadline",
+          width: 50
+        },{
+          type: "pay_status",
+          label: '结算情况',
+          prop: "settlement",
           width: 50
         },{
           type: "textarea",
           label: '备注',
-          prop: "remarks",
+          prop: "remark",
         },{
-          type: "btn",
-          label: '操作',
-          prop: "done",
+          type: "link",
+          label: '详情',
+          prop: "detail",
           width: 50,
 
-          btnLabel: '放弃',
-          btnStyle: 'danger',
-          btnEvent: 'giveup'
-        },{
-          type: "btn",
-          label: '文档内容',
-          prop: "content",
-          width: 50,
-
-          btnLabel: '下载',
-          btnStyle: 'primary',
-          btnEvent: 'download'
+          linkLabel: '详情',
+          btnEvent: 'detail'
         }
       ],
-      tableData: []
+      tableData: [],
+      user_id: '',
+      searchParam: {},
+      // currentPage: 1,
+      // pagesize: 20,
     }
+  },
+  created(){
+    let userInfo = this.$cookie.get('userInfo') && JSON.parse(this.$cookie.get('userInfo'))
+    this.user_id = userInfo.userId
   },
   methods: {
     getSearch(order){
-      console.log(order)
-      api.getOrderList(order).then(res => {
-        this.tableData = res
+      this.searchParam = {user_id: this.user_id, status: 3}
+      for (let key in order) {
+        if (Object.hasOwnProperty.call(order, key)) {
+          let element = order[key];
+          if(element){
+            this.searchParam[key] = element;
+          }
+        }
+      }
+      
+      this.search()
+    },
+    search(){
+      api_Order.getOrderList3(this.searchParam).then(res => {
+        this.tableData = res.orders
       })
     },
     rowOperation(btnEvent, row){
@@ -113,8 +118,19 @@ export default {
         console.log(btnEvent, row)
       }else if(btnEvent == "download"){
         console.log(btnEvent, row)
+      }else if(btnEvent == "detail"){
+        console.log(btnEvent, row)
       }
     },
+    getNewOrder(pagesize, currentPage){
+      console.log(pagesize, currentPage)
+      this.search()
+    },
+
+    // pageOperation(pagesize, currentPage){
+    //   this.pagesize = pagesize
+    //   this.currentPage = currentPage
+    // }
   }
 }
 </script>

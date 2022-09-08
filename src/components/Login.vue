@@ -63,7 +63,7 @@
 
 <script>
 const config = require('../../config/index')
-import api from '../api/demo/user';
+import api from '../api/user';
 import { getUUID } from '../utils/index'
 export default {
   name: "Login",

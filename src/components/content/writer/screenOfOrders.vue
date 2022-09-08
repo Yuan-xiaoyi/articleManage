@@ -40,7 +40,7 @@
         </el-table>
         
         <el-carousel height="256px" style="width: 50%">
-          <el-carousel-item v-for="item in images" :key="item"
+          <el-carousel-item v-for="(item,index) in images" :key="index"
             :style="{
               backgroundImage: 'url('+ item.value + ')'
             }"

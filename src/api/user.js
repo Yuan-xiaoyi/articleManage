@@ -1,5 +1,5 @@
 //引入request文件
-import instance from '../index';
+import instance from './index';
  
 //导出封装ok的请求
  
@@ -38,27 +38,45 @@ const api = {
   },
 
   // 获取当前用户信息
-  getUserInfo(){
+  getUserInfo(data){
     return instance({
-      url: '/sys/user/info',
+      url: data ? `/sys/user/info/${data}` : '/sys/user/info',
       method: 'get'
     })
   },
   // 获取所有用户
-  getUserList(data){
+  getUserList(){ //data
     return instance({
       url: '/sys/user/list',
       method: 'get',
-      params: data,
+      // params: data,
     })
   },
   
   register: (data) => {
     return instance({
-      url: '/register',
-      method: 'get',
+      url: '/sys/user/save', 
+      method: 'post',
       //请求传递的参数
-      params: data, 
+      data: data, 
+    })
+  },
+  
+  verifyPassword: (data) => {
+    return instance({
+      url: '/sys/user/verifypassword', 
+      method: 'post',
+      //请求传递的参数
+      data: data, 
+    })
+  },
+
+  update: (data) => {
+    return instance({
+      url: '/sys/user/update', 
+      method: 'post',
+      //请求传递的参数
+      data: data, 
     })
   },
 

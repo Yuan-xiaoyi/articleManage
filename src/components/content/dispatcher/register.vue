@@ -1,7 +1,5 @@
 <template>
   <div style="height: 100%; overflow: auto;">
-    <h3>注册新人</h3>
-
     <el-form ref="form" :rules="rules" :model="form" label-width="80px" class="form">
       <el-form-item label="账户名称" prop="name">
         <el-input v-model="form.name"></el-input>
@@ -11,9 +9,9 @@
       </el-form-item>
       <el-form-item label="账户身份" prop="identity">
         <el-radio-group v-model="form.identity">
-          <el-radio label="admin" >管理员</el-radio>
-          <el-radio label="writer">写手</el-radio>
-          <el-radio label="TP">第三方</el-radio>
+          <el-radio label="4" >管理员</el-radio>
+          <el-radio label="2">写手</el-radio>
+          <el-radio label="3">第三方</el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="手机号码" prop="mobile">
@@ -62,6 +60,7 @@
 </template>
 
 <script>
+import api from "../../../api/user"
 const validateEmail = function validateEmail(rule, value, callback) {
   const emailReg = /^(([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5}){1,25})$/ // eslint-disable-line
   if (!value) {
@@ -82,7 +81,7 @@ export default {
       form: {
         name: '',
         password: '',
-        identity: '',
+        identity: '2',
         mobile: '',
         email: '',
         image: '',
@@ -97,7 +96,7 @@ export default {
         identity: [
           { required: true, message: '必须选择身份信息', trigger: 'change' }
         ],
-        mobile: [{ min:11, max:11, message: '手机号为11位', trigger: 'change' },
+        mobile: [{required: true, min:11, max:11, message: '手机号为11位', trigger: 'change' },
           {
             trigger: 'blur',
             validator: (rule, value, callback) => {
@@ -118,7 +117,7 @@ export default {
           }
         ],
         email: [
-          { required: false, message: '邮箱必填', trigger: 'blur' },
+          { required: true, message: '邮箱必填', trigger: 'blur' },
           { validator: validateEmail, trigger: "blur" }
         ]
       },
@@ -143,7 +142,24 @@ export default {
     onSubmit(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          console.log(this.form, this.fileList)
+          let SysUserEntityEdit = {
+            username: this.form.name,
+            password: this.form.password,
+            // rolename: this.form.identity,
+            email: this.form.email,
+            mobile: this.form.mobile,
+            status: this.form.identity == "2" ? 0 : 1,
+            roleIdList: [parseInt(this.form.identity)]
+          }
+          // SysUserEntityEdit {
+          //   userId (integer, optional)
+          // }
+
+          api.register(SysUserEntityEdit).then(() => {
+            this.$message.success("注册成功！")
+          }).catch(e => {
+            this.$message.error(e.msg ? e.msg : e.message)
+          })
         } else {
           return false;
         }

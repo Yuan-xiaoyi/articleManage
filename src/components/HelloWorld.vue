@@ -59,7 +59,7 @@ export default {
     overflow-y: auto;
     overflow-x: hidden;
     /* margin:0 200px; */
-    background-color: #CCE8CF;
+    background-color: whitesmoke ; /* #CCE8CF */
   }
   .main{
     display: block;
