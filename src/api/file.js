@@ -43,7 +43,7 @@ const api = {
       url: `/platform/pfile/download/${params}`,
       method: 'get',
       // headers: {
-      //   'responseType': 'blob'
+        'responseType': 'blob'
       // },
       // data: data, 
     })

@@ -230,13 +230,14 @@ export default {
       const isDocx = file.name.split('.')[1] === 'docx'
       const isDoc = file.name.split('.')[1]==='doc'
       const isPdf = file.name.split('.')[1]==='pdf'
+      const isTxt = file.name.split('.')[1]==='txt'
       const isZip = file.name.split('.')[1]==='zip'
       const isRar = file.name.split('.')[1]==='rar'
 
-      if (!isDocx && !isDoc && !isPdf && !isZip && !isRar) {
-        this.$message.error('上传文档只能是 doc/docx/pdf/zip/rar 格式!');
+      if (!isDocx && !isDoc && !isPdf && !isZip && !isRar && !isTxt) {
+        this.$message.error('上传文档只能是 doc/docx/pdf/zip/rar/txt 格式!');
       }
-      return isDocx || isDoc || isPdf || isZip || isRar;
+      return isDocx || isDoc || isPdf || isZip || isRar || isTxt;
     },
     handleExceed(files, fileList) {
       console.log('on-exceed', files, fileList)

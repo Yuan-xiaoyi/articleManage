@@ -19,7 +19,7 @@
               :class="{status: feild.type === 'status&btn'}"
               :type="scope.row[feild.prop] == 0 || scope.row[feild.prop] == 1 ? 'info' :
                      scope.row[feild.prop] == 6 ? 'success' :
-                     scope.row[feild.prop] == 3 ? 'warning' : 'primary'
+                     scope.row[feild.prop] == 3 || scope.row[feild.prop] == 4 ? 'warning' : 'primary'
                     "
               disable-transitions
             >{{judge(scope.row[feild.prop])}}</el-tag>
@@ -247,15 +247,17 @@ export default {
       },
       download(row){
         api_File.downloadOrderFile(row.file).then(res => {
-          let blob = new Blob([res],{type: 'application/octet-stream,charset=utf-8'});
-          let downloadElement = document.createElement('a');
-          let href = window.URL.createObjectURL(blob); //创建下载的链接
-          downloadElement.href = href;
-          // downloadElement.setAttribute('download', 'fileName')
-          document.body.appendChild(downloadElement);
-          downloadElement.click; //点击下载
-          document.body.removeChild(downloadElement); //下载完成移除元素
-          window.URL.revokeObjectURL(href); //释放掉blob对象
+          let blob = new Blob([res])
+          console.log(blob)
+          let downloadUrl = window.URL.createObjectURL(blob)
+          let anchor = document.createElement('a')
+          //anchor.style.display = "none";
+          anchor.href = downloadUrl
+          // 这里的filename 带有后缀，能决定文件的类型
+          anchor.setAttribute("download", row.file);
+          document.body.appendChild(anchor)
+          anchor.click()
+          document.body.removeChild(anchor)
         }).catch(e => {
           this.$message.error(e.msg);
         })

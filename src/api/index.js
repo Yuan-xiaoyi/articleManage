@@ -43,25 +43,32 @@ instance.interceptors.request.use(
  
 //如有需要，可在请求收到回复之后，做拦截处理
 instance.interceptors.response.use( (res) => {
-    //请根据项目前后端约定，更改对应字段取值
-    let resData = res.data;
-    let code = resData.code || '200';
-    if(code != '200'){
-      if(res.config.commonHandleError !== false){
-          
-        // this.$Message.showToast({
-        //     title: "网络连接错误，请稍后再试",
-        //     icon: "fail", //success 成功， fail 失败
-        //     duration: 1500
-        // })
+    // 导出
+    const headers = res.headers
+    if (headers['content-type'] === 'application/octet-stream;charset=utf-8') {
+      return res.data
+    }else{
 
-        // Message.error(resData && resData.message || '网络连接错误，请稍后再试');
+      //请根据项目前后端约定，更改对应字段取值
+      let resData = res.data;
+      let code = resData.code || '200';
+      if(code != '200'){
+        if(res.config.commonHandleError !== false){
+            
+          // this.$Message.showToast({
+          //     title: "网络连接错误，请稍后再试",
+          //     icon: "fail", //success 成功， fail 失败
+          //     duration: 1500
+          // })
+
+          // Message.error(resData && resData.message || '网络连接错误，请稍后再试');
+        }
+        //将数据暴露给调用函数，以便调用方使用catch捕获做个性化处理
+        return Promise.reject(resData);
       }
-      //将数据暴露给调用函数，以便调用方使用catch捕获做个性化处理
-      return Promise.reject(resData);
-    }
 
-    return resData;
+      return resData;
+    }
   }, (error) => {
     console.log(error);
     
