@@ -42,14 +42,14 @@ export default {
           prop: 'writerStatus',
           options: [
             {
-              label: '全部',
+              label: '不选择',
               value: ''
             },{
               label: '上班',
               value: '1'
             },{
               label: '休假',
-              value: '0'
+              value: '2'
             }
           ]
         },{

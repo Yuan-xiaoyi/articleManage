@@ -68,6 +68,10 @@ export default {
           prop: "settlement",
           width: 50
         },{
+          label: '订单价格(元)',
+          prop: "money",
+          width: 50
+        },{
           type: "textarea",
           label: '备注',
           prop: "remark",
