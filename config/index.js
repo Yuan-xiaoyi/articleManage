@@ -6,7 +6,7 @@ const path = require('path')
 const assetsPublicPath = '/'
 
 module.exports = {
-  BASE_URL: "http://82.157.207.226:8080/renren-fast/",
+  BASE_URL: "http://82.157.207.226:81/renren-fast/",
   dev: {
     // Paths
     assetsSubDirectory: 'static',

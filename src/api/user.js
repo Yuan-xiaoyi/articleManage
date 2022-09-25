@@ -70,7 +70,14 @@ const api = {
       data: data, 
     })
   },
-
+  changeStatus: (data) => {
+    return instance({
+      url: '/sys/user/status', 
+      method: 'post',
+      //请求传递的参数
+      data: data, 
+    })
+  },
   update: (data) => {
     return instance({
       url: '/sys/user/update', 

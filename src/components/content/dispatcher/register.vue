@@ -145,10 +145,10 @@ export default {
           let SysUserEntityEdit = {
             username: this.form.name,
             password: this.form.password,
-            // rolename: this.form.identity,
+            image: this.form.image,
             email: this.form.email,
             mobile: this.form.mobile,
-            status: this.form.identity == "2" ? 0 : 1,
+            status: this.form.identity == "2" ? 2 : 1,
             roleIdList: [parseInt(this.form.identity)]
           }
           // SysUserEntityEdit {

@@ -40,7 +40,7 @@
           style="float: left;"
         >
           <el-button size="small" type="primary">点击上传</el-button>
-          <div slot="tip" class="el-upload__tip">只能上传doc/docx/pdf文件</div>
+          <div slot="tip" class="el-upload__tip">只能上传doc/docx/pdf/txt/zip/rar文件</div>
         </el-upload>
       </el-form-item>
       <el-form-item label="订单价格(元)" prop="orderPrice">
@@ -120,7 +120,7 @@ export default {
       this.writerList = res.page.list.map(e => {
         let item = JSON.parse(JSON.stringify(e))
         this.$set(item, "value", e.username)
-        if(item.role == "writer" && item.status == 1){
+        if(item.role == "writer"){
           return item
         }
       })

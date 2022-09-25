@@ -23,7 +23,7 @@ export default {
   },
   methods:{
     getFooterJson(){
-      axios.get('https://v1.hitokoto.cn/?encode=json').then(res => {
+      axios.get('https://v1.hitokoto.cn/?encode=json&c=d').then(res => {
         this.footJson = res.data
       }).catch(function (error) {
         console.log(error)

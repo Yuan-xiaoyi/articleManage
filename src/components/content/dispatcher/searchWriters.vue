@@ -61,9 +61,10 @@ export default {
       ],
       tableFeilds: [
         {
+          type: "writerName",
           label: '写手名',
-          prop: "user_id",
-          width: 50,
+          prop: "userId",
+          width: 50
         },{
           label: '稿件名',
           prop: "title"
@@ -142,15 +143,15 @@ export default {
       this.search()
     },
     search(){
-      if(Object.keys(this.searchParam).length <= 0){
-        api_Order.getOrderList2().then(res => {
-          this.tableData = res.page
-        })
-      }else{
+      // if(Object.keys(this.searchParam).length <= 0){
+      //   api_Order.getOrderList2().then(res => {
+      //     this.tableData = res.page
+      //   })
+      // }else{
         api_Order.getOrderList3(this.searchParam).then(res => {
           this.tableData = res.orders
         })
-      }
+      // }
     },
     rowOperation(btnEvent, row){
       if(btnEvent == "upload"){

@@ -45,11 +45,17 @@ const api = {
   acceptOrder(order_id){
     return instance({
       url: `/platform/porder/accept/${order_id}`,
-      method: 'post',
-      // data: data,
+      method: 'get',
     })
   },
   
+  updateOrderStatus(data){
+    return instance({
+      url: `/platform/porder/update`,
+      method: 'post',
+      data: data,
+    })
+  },
 
 }
 export default api;

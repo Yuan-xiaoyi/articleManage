@@ -95,6 +95,11 @@ export default {
           prop: "money",
           width: 50
         },{
+          type: "writerName",
+          label: '接单写手',
+          prop: "userId",
+          width: 50
+        },{
           label: '稿件来源',
           prop: "source",
           width: 50
@@ -163,15 +168,15 @@ export default {
       this.search()
     },
     search(){
-      if(Object.keys(this.searchParam).length <= 0){
-        api_Order.getOrderList2().then(res => {
-          this.tableData = res.page
-        })
-      }else{
+      // if(Object.keys(this.searchParam).length <= 0){
+      //   api_Order.getOrderList2().then(res => {
+      //     this.tableData = res.page
+      //   })
+      // }else{
         api_Order.getOrderList3(this.searchParam).then(res => {
           this.tableData = res.orders
         })
-      }
+      // }
     },
     rowOperation(btnEvent, row){
       if(btnEvent == "upload"){

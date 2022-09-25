@@ -9,7 +9,7 @@
           type="success" round
           :disabled="onlineStatus"
           style="width: 200px;margin: 0 10px"
-          
+          @click="acceptOrder"
         >{{'接单('+ orderNum +')'}}</el-button>
         <el-switch
           style="margin:10px 4px"
@@ -94,10 +94,13 @@
 
 <script>
 import * as echarts from 'echarts';
+
+import api_User from "../../../api/user"
 export default {
   name: 'screenOfOrders',
   data(){
     return{
+      userInfo: {},
       onlineStatus: false,
       restText: "休息...",
       workText: "上班ing",
@@ -138,6 +141,24 @@ export default {
     this.chart = document.getElementById('chart');
     this.myChart = echarts.init(this.chart);
     this.changeTu('bar')
+    this.userInfo = JSON.parse(this.$cookie.get('userInfo'))
+    if(this.userInfo.status == 2){
+      this.onlineStatus = false
+    }else if(this.userInfo.status == 1){
+      this.onlineStatus = true
+    }
+  },
+  watch: {
+    onlineStatus(val) {
+      let info = {
+        // "id": this.userInfo.,
+        "status": val == true ? 2 : 1,
+        "userId": this.userInfo.userId
+      }
+      api_User.changeStatus(info).then(res => {
+        this.$message.success(res.msg)
+      })
+    }
   },
   methods: {
     tableRowClassName({/**row, */ rowIndex}) {
@@ -149,7 +170,11 @@ export default {
       }
       return '';
     },
-
+    acceptOrder(){
+      if(this.orderNum < 5){
+        this.orderNum++
+      }
+    },
     changeTu(str){
       let optionBar = {
         title: {

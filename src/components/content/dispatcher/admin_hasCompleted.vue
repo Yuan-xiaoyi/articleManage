@@ -86,6 +86,11 @@ export default {
           prop: "money",
           width: 50
         },{
+          type: "writerName",
+          label: '接单写手',
+          prop: "userId",
+          width: 50
+        },{
           label: '稿件来源',
           prop: "source",
           width: 50
