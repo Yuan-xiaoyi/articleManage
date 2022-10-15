@@ -46,12 +46,15 @@ export default {
           options: this.$store.state.orderStatus.settlement
         },{
           type: 'date',
-          label: '订单时段',
-          prop: 'orderDate',
+          label: '交稿日期',
+          prop: 'deadline', 
         }
       ],
       tableFeilds: [
         {
+          label: '订单ID',
+          prop: "id"
+        },{
           type: "status",
           label: '订单状态',
           prop: "status",
@@ -107,11 +110,11 @@ export default {
   },
   methods: {
     getSearch(order){
-      this.searchParam = {user_id: this.user_id}
+      this.searchParam = {userId: this.user_id}
       for (let key in order) {
         if (Object.hasOwnProperty.call(order, key)) {
           let element = order[key];
-          if(element){
+          if(element != undefined){
             this.searchParam[key] = element;
           }
         }
@@ -121,7 +124,9 @@ export default {
     },
     search(){
       api_Order.getOrderList3(this.searchParam).then(res => {
-        this.tableData = res.orders
+        this.tableData = res.pOrderEntities
+      }).catch(e => {
+        this.$message.error(e.msg);
       })
     },
     rowOperation(btnEvent, row){

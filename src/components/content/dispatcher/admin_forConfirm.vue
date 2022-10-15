@@ -49,6 +49,9 @@ export default {
       ],
       tableFeilds: [
         {
+          label: '订单ID',
+          prop: "id"
+        },{
           type: "status",
           label: '订单状态',
           prop: "status",
@@ -91,6 +94,9 @@ export default {
           prop: "userId",
           width: 50
         },{
+          label: '稿件来源号',
+          prop: "sourceId"
+        },{
           label: '稿件来源',
           prop: "source",
           width: 50
@@ -132,7 +138,7 @@ export default {
       for (let key in order) {
         if (Object.hasOwnProperty.call(order, key)) {
           let element = order[key];
-          if(element){
+          if(element != undefined){
             this.searchParam[key] = element;
           }
         }
@@ -142,7 +148,9 @@ export default {
     },
     search(){
       api_Order.getOrderList3(this.searchParam).then(res => {
-        this.tableData = res.orders
+        this.tableData = res.pOrderEntities
+      }).catch(e => {
+        this.$message.error(e.msg);
       })
     },
     rowOperation(btnEvent, row){

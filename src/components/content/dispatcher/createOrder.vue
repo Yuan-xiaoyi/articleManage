@@ -1,6 +1,6 @@
 <template>
   <div style="height: 100%; overflow: auto;">
-    <el-form ref="form" :rules="rules" :model="form" label-width="120px" class="form">
+    <el-form ref="form" :rules="rules" :model="form" label-width="150px" class="form">
       <el-form-item label="稿件名" prop="title">
         <el-input v-model="form.title"></el-input>
       </el-form-item>
@@ -12,6 +12,20 @@
           class="numberInput"
         ></el-input>
       </el-form-item>
+      <el-form-item label="订单价格(元)" prop="orderPrice">
+        <el-input v-model="form.orderPrice" min="0"
+          onKeypress="return (/[\d]/.test(String.fromCharCode(event.keyCode)))"></el-input>
+      </el-form-item>
+      <el-form-item label="派给写手价格(元)" prop="writerMoney">
+        <el-input v-model="form.writerMoney" min="0"
+          onKeypress="return (/[\d]/.test(String.fromCharCode(event.keyCode)))"></el-input>
+      </el-form-item>
+      <el-form-item label="订单来源" prop="orderSource">
+        <el-input v-model="form.orderSource"></el-input>
+      </el-form-item>
+      <el-form-item label="订单来源号" prop="sourceId">
+        <el-input v-model="form.sourceId"></el-input>
+      </el-form-item>
       <el-form-item label="交稿时间" prop="finishDate">
         <el-date-picker
           v-model="form.finishDate"
@@ -20,10 +34,19 @@
           value-format="yyyy-MM-dd"
         ></el-date-picker>
       </el-form-item>
-      <el-form-item label="备注" prop="textarea">
+      <el-form-item label="派单至" prop="writer">
+        <el-select v-model="form.writer" placeholder="" filterable :filter-method="dataFilter" clearable>
+          <el-option
+            v-for="(writer,index) in options" :key="index"
+            :label="writer.username"
+            :value="writer.userId"
+          ></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="备注" prop="textarea" style="width: 80%;">
         <el-input v-model="form.textarea" type="textarea" :rows="6"></el-input>
       </el-form-item>
-      <el-form-item label="需求文档" prop="textarea">
+      <el-form-item label="需求文档" prop="textarea" style="width: 80%;">
         <el-upload
           class="upload-demo"
           action=""
@@ -43,28 +66,8 @@
           <div slot="tip" class="el-upload__tip">只能上传doc/docx/pdf/txt/zip/rar文件</div>
         </el-upload>
       </el-form-item>
-      <el-form-item label="订单价格(元)" prop="orderPrice">
-        <el-input v-model="form.orderPrice" type="number" min="0"
-          onKeypress="return (/[\d]/.test(String.fromCharCode(event.keyCode)))"></el-input>
-      </el-form-item>
-      <el-form-item label="派给写手价格(元)" prop="writerMoney">
-        <el-input v-model="form.writerMoney" type="number" min="0"
-          onKeypress="return (/[\d]/.test(String.fromCharCode(event.keyCode)))"></el-input>
-      </el-form-item>
-      <el-form-item label="订单来源" prop="orderSource">
-        <el-input v-model="form.orderSource"></el-input>
-      </el-form-item>
-      <el-form-item label="派单至" prop="writer">
-        <el-select v-model="form.writer" placeholder="" filterable :filter-method="dataFilter" clearable>
-          <el-option
-            v-for="(writer,index) in options" :key="index"
-            :label="writer.username"
-            :value="writer.userId"
-          ></el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" @click="onSubmit('form')">创建并派单</el-button>
+      <el-form-item class="footer">
+        <el-button type="primary" :loading="loading" @click="onSubmit('form')">创建并派单</el-button>
         <el-button @click="resetForm('form')">取消</el-button>
       </el-form-item>
     </el-form>
@@ -81,13 +84,14 @@ export default {
     return{
       form: {
         title: '',
-        wordsNum: 0,
+        wordsNum: '',
         finishDate: '',
         textarea: '',
         // file: '',
-        orderPrice: 0,
-        writerMoney: 0,
+        orderPrice: '',
+        writerMoney: '',
         orderSource: '',
+        sourceId: '',
         writer: ''
       },
       rules:{
@@ -106,11 +110,18 @@ export default {
         ],
         writerMoney: [
           { required: true, message: '请输入派给写手价格', trigger: 'blur' }
-        ]
+        ],
+        // orderSource:  [
+        //   { required: true, message: '请输入订单来源', trigger: 'blur' }
+        // ],
+        // sourceId:  [
+        //   { required: true, message: '请输入订单来源号', trigger: 'blur' }
+        // ]
       },
       options: [],
       writerList: [],
-      fileList: []
+      fileList: [],
+      loading: false
     }
   },
   created(){
@@ -145,7 +156,7 @@ export default {
     onSubmit(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          
+          this.loading = true
           let param = {
             userId: this.form.writer,
             title: this.form.title,
@@ -154,6 +165,7 @@ export default {
             remark: this.form.textarea,
             price: parseInt(this.form.orderPrice),
             source: this.form.orderSource,
+            sourceId: this.form.sourceId,
             money: parseInt(this.form.writerMoney),
             status: 2
           }
@@ -173,20 +185,25 @@ export default {
                 formData.append("file", this.fileList[0]);
                 api_File.uploadOrderFile({id: result.id, formData: formData}).then(() => {
                   this.$message.success("创建并已成功派单！")
+                  this.loading = false
                 }).catch(error => {
+                  this.loading = false
                   this.$message.error(error.msg)
                   // 上传文件失败则要删除订单 和 文件记录
                   api_Order.deleteOrder([res.id]).then({})
                 })
               }else{
+                this.loading = false
                 this.$message.success("创建并已成功派单！")
               }
             }).catch(er => {
+              this.loading = false
               this.$message.error(er.msg)
               // 新增文件记录失败则要删除订单
               api_Order.deleteOrder([res.id]).then({})
             })
           }).catch(e => {
+            this.loading = false
             this.$message.error(e.msg)
           })
         } else {
@@ -258,17 +275,22 @@ export default {
 <style scoped>
 .form{    
   position: relative;
-  left: 50%;
-  transform: translate(-50%, 0%);
-  width: 500px;
+}
+.form >>> .el-form-item{
+  width: 40%;
+  display: inline-block;
 }
 .el-input{
   width: 100%;
 }
 .el-select{
   width: 100%;
+  /* float: left; */
 }
-
+.footer{
+  width: 80% !important;
+  text-align: center;
+}
 /* .numberInput input::-webkit-outer-spin-button,
 .numberInput input::-webkit-inner-spin-button {
     -webkit-appearance: none;

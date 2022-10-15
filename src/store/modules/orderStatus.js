@@ -41,10 +41,10 @@ export default {
         value: ''
       },{
         label: '待结算',
-        value: '0'
+        value: 0
       },{
         label: '已结算',
-        value: '1'
+        value: 1
       }
     ]
   },

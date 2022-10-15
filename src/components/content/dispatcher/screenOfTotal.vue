@@ -12,20 +12,30 @@
       </el-row>
 
       <el-table        
-        :data="allOrderData"
+        :data="allWriterData"
         height="calc(100% - 96px)"
       >
-        <el-table-column
-          prop="date"
-          label="日期">
+        <el-table-column prop="username" label="姓名"></el-table-column>
+        <el-table-column label="在线状态">
+          <template slot-scope="scope">
+            <el-tag
+              :type="scope.row.status == 1 ? 'success': 'warning'"
+              disable-transitions
+            >{{ scope.row.status == 1 ? "上班" : "休假"}}</el-tag>
+          </template>
         </el-table-column>
         <el-table-column
-          prop="name"
-          label="姓名">
+          prop="username"
+          label="期望接单数量">
+        </el-table-column>
+        <el-table-column label="操作">
+          <template slot-scope="scope">
+            <el-button type="danger" plain size="mini" @click="delUser(scope.row)">删除写手</el-button>
+          </template>
         </el-table-column>
       </el-table>
     </div>
-    <div v-else style="width:100%">
+    <div v-else style="width:100%" class="detailPage">
       <el-page-header @back="goBack" :content="detailTitle"></el-page-header>
       <div>
         <component :is="componentName" ></component>
@@ -35,6 +45,7 @@
 </template>
 
 <script>
+import api_User from "../../../api/user"
 export default {
   name: 'screenOfTotal',
   data(){
@@ -44,7 +55,7 @@ export default {
       colPages:[
         {
           imgUrl: require("../../../assets/totalScreen/searchWriters.png"),
-          title: "查看写手",
+          title: "接单详情",
           subTitle: "查看写手近期交付详情并进行结算",
           page: "searchWriters"
         },{
@@ -64,19 +75,12 @@ export default {
           page: "notice"
         }
       ],
-      allOrderData: [
-        {
-          date: '2016-05-02',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        }, {
-          date: '2016-05-04',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1517 弄'
-        }
-      ],
+      allWriterData: [],
       componentName:""
     }
+  },
+  created(){
+    this.searchAllUsers()
   },
   methods:{
     goto(item){
@@ -86,6 +90,26 @@ export default {
     },
     goBack(){
       this.showDetail = false
+    },
+    searchAllUsers(){
+      api_User.getUserList().then(res => {
+        this.allWriterData = res.page.list.map(e => {
+          if(e.role == "writer"){
+            return e
+          }
+        })
+        this.allWriterData = this.allWriterData.filter(ele=>{return ele!=undefined})
+      }).catch(e => {
+        this.$message.error(e.msg)
+      })
+    },
+    delUser(row){
+      api_User.delUser(row.userId).then(res => {
+        this.$message.success(res.msg)
+        this.searchAllUsers()
+      }).catch(e => {
+        this.$message.error(e.msg)
+      })
     }
   }
 }
@@ -115,6 +139,7 @@ export default {
   font-size: 20px;
   color: #303133;
   line-height: 1.3;
+
 }
 .subTitle{
   margin-top: 10px;
@@ -122,10 +147,10 @@ export default {
   color: #606266;
   line-height: 1.3;
 }
-.el-page-header__content{
+.detailPage >>> .el-page-header__content{
   font-size: 18px;
   color: #303133;
-  font-weight: bold;
+  font-weight: bolder;
 }
 .el-page-header {
   margin: 10px 0px 20px;

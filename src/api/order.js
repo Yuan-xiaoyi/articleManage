@@ -16,8 +16,23 @@ const api = {
   },
   // 订单查询（有条件）
   getOrderList3: (params) => {
+      return instance({
+        url: '/platform/porder/orderList',
+        method: 'post',
+        data: params
+      })
+    },
+  // getOrderList3: (params) => {
+  //   return instance({
+  //     url: '/platform/porder/list3',
+  //     method: 'get',
+  //     params: params
+  //   })
+  // },
+  
+  searchWriter: (params) => {
     return instance({
-      url: '/platform/porder/list3',
+      url: '/sys/user/queryUser',
       method: 'get',
       params: params
     })

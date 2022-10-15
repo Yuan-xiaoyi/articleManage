@@ -1,8 +1,7 @@
 <template>
   <div style="height: 100%; overflow: auto;">
-    <h3 style="margin-top:0">订单大屏</h3>
-    <div class="modleDiv" style="height: 45%">
-      <el-divider class="divHead" content-position="left" >当前事务（待写的，待结算）</el-divider>
+    <div class="modleDiv" style="height: 60%">
+      <el-divider class="divHead" content-position="left" >当前事务</el-divider>
       
       <div style="display: inline-flex;float: left;width: 100%;margin: 0 0 6px 0;">
         <el-button
@@ -16,30 +15,21 @@
           v-model="onlineStatus"
           active-color="gray"
           inactive-color="#13ce66"
+          @change="changeStatus"
         >
         </el-switch>
         <span style="line-height: 40px;">{{onlineStatus ? restText: workText}}</span>
       </div>
 
-      <div style="display: inline-flex;width: 100%;">
-        <el-table        
-          :data="allOrderData"
-          :row-class-name="tableRowClassName"
-          :show-header="false"
-          height="calc(100% - 96px)"
-          style="width: 50%"
-        >
-          <el-table-column
-            prop="date"
-            label="日期">
-          </el-table-column>
-          <el-table-column
-            prop="name"
-            label="姓名">
-          </el-table-column>
-        </el-table>
+      <div style="display: inline-flex;width: 100%;height: calc(100% - 96px)">
+        <y-table
+          :tableFeilds="tableFeilds"
+          :tableData="tableData"
+          :needBottom="false"
+          style="width: 50%;height: calc(100% + 48px); overflow: hidden"
+        ></y-table>
         
-        <el-carousel height="256px" style="width: 50%">
+        <el-carousel height="100%" style="width: 50%;height: 100%">
           <el-carousel-item v-for="(item,index) in images" :key="index"
             :style="{
               backgroundImage: 'url('+ item.value + ')'
@@ -73,18 +63,16 @@
         <el-divider class="divHead" content-position="left">公告</el-divider>
               
         <el-timeline style="height: calc(100% - 48px); overflow: auto">
-          <el-timeline-item timestamp="2018/4/2" placement="top">
+
+          <el-timeline-item 
+            v-for="(item,index) in notices" :key="index"
+            :timestamp="item.createDate" placement="top">
             <el-card>
-              <h4>更新 Github 模板</h4>
-              <p>王小虎 提交于 2018/4/2 20:46</p>
+              <h4>{{item.title}}</h4>
+              <p>{{item.content}}</p>
             </el-card>
           </el-timeline-item>
-          <el-timeline-item timestamp="2018/4/2" placement="top">
-            <el-card>
-              <h4>更新 Github 模板</h4>
-              <p>王小虎 提交于 2018/4/2 20:46</p>
-            </el-card>
-          </el-timeline-item>
+
         </el-timeline>
         
       </div>
@@ -94,14 +82,19 @@
 
 <script>
 import * as echarts from 'echarts';
-
+import yTable from "../public/yTable.vue"
 import api_User from "../../../api/user"
+import api_Order from "../../../api/order"
+import api_Notice from '../../../api/notice'
 export default {
   name: 'screenOfOrders',
+  components: {
+    yTable
+  },
   data(){
     return{
       userInfo: {},
-      onlineStatus: false,
+      onlineStatus: true,
       restText: "休息...",
       workText: "上班ing",
       orderNum: 0,
@@ -124,43 +117,88 @@ export default {
       chart:{},
       myChart:{},
 
-      allOrderData: [
+      tableData: [],
+      tableFeilds: [
         {
-          date: '2016-05-02',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        }, {
-          date: '2016-05-04',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1517 弄'
+          type: "status",
+          label: '订单状态',
+          prop: "status",
+          width: 50,
+
+          btnLabel: '上传稿件',
+          btnStyle: '',
+          btnEvent: 'upload'
+        },{
+          label: '稿件名',
+          prop: "title"
+        },{
+          label: '交稿时间',
+          prop: "deadline",
+          width: 50
+        },{
+          type: "pay_status",
+          label: '结算情况',
+          prop: "settlement",
+          width: 50
         }
-      ]
+      ],
+
+      notices: []
     }
   },
   mounted(){
     this.chart = document.getElementById('chart');
     this.myChart = echarts.init(this.chart);
     this.changeTu('bar')
+
     this.userInfo = JSON.parse(this.$cookie.get('userInfo'))
-    if(this.userInfo.status == 2){
-      this.onlineStatus = false
-    }else if(this.userInfo.status == 1){
-      this.onlineStatus = true
+    this.onlineStatus = this.userInfo.status == 2 ? true : false
+    
+    if(this.$cookie.get('role') == "writer"){
+      api_Notice.searchNotice().then(res => {
+        this.notices = res.page.list.reverse()
+      }).catch(e => {
+        this.$message.error(e.msg)
+      })
+
+      let param1 = { // 待修改
+        userId: this.userInfo.userId,
+        status: 3
+      }
+      let param2 = { // 未初稿
+        userId: this.userInfo.userId,
+        status: 4
+      }
+      const arr = [
+        api_Order.getOrderList3(param1),
+        api_Order.getOrderList3(param2),
+        // api_Order.getOrderList3(param3)
+      ]
+      Promise.all(arr).then(p => {
+        p.forEach(e => {
+          this.tableData = [...this.tableData, ...e.pOrderEntities]
+        })
+      })
+
     }
   },
-  watch: {
-    onlineStatus(val) {
+  methods: {
+    changeStatus(val){
       let info = {
-        // "id": this.userInfo.,
-        "status": val == true ? 2 : 1,
+        "status": val == true ? 2 : 1,// 1：上班  2：休假
         "userId": this.userInfo.userId
       }
       api_User.changeStatus(info).then(res => {
         this.$message.success(res.msg)
+        
+        api_User.getUserInfo().then(result =>{
+          // 设置userInfo
+          this.$cookie.set('userInfo', JSON.stringify(result.user))
+          
+          this.userInfo = JSON.parse(this.$cookie.get('userInfo'))
+        })
       })
-    }
-  },
-  methods: {
+    },
     tableRowClassName({/**row, */ rowIndex}) {
       // console.log(row)
       if (rowIndex === 0) {

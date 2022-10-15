@@ -32,7 +32,6 @@ const api = {
     return instance({
       url: '/sys/login',
       method: 'post',
-      //请求传递的参数
       data: data, 
     })
   },
@@ -57,7 +56,6 @@ const api = {
     return instance({
       url: '/sys/user/save', 
       method: 'post',
-      //请求传递的参数
       data: data, 
     })
   },
@@ -66,7 +64,6 @@ const api = {
     return instance({
       url: '/sys/user/verifypassword', 
       method: 'post',
-      //请求传递的参数
       data: data, 
     })
   },
@@ -74,7 +71,6 @@ const api = {
     return instance({
       url: '/sys/user/status', 
       method: 'post',
-      //请求传递的参数
       data: data, 
     })
   },
@@ -82,16 +78,14 @@ const api = {
     return instance({
       url: '/sys/user/update', 
       method: 'post',
-      //请求传递的参数
       data: data, 
     })
   },
 
-  del: (data) => {
+  delUser: (data) => {
     return instance({
-      url: '/delUser',
-      method: 'POST',
-      //请求传递的参数
+      url: '/sys/user/delete',
+      method: 'post',
       data: data, 
     })
   },

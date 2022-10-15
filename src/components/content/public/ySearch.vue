@@ -30,9 +30,9 @@
         <el-date-picker
           v-if="feild.type == 'date'"
           v-model="order[feild.prop]"
-          type="date"
+          type="month"
           placeholder="选择时间"
-          value-format="yyyy-MM-dd"
+          value-format="yyyy-MM"
         ></el-date-picker>
 
       </el-form-item>

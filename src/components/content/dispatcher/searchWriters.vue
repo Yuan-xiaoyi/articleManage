@@ -34,22 +34,22 @@ export default {
         {
           type: 'nameSelect',
           label: '写手名',
-          prop: 'user_id',
+          prop: 'userId',
           options: []
         },{
           type: 'select',
           label: '是否上班',
-          prop: 'writerStatus',
+          prop: 'status',
           options: [
             {
               label: '不选择',
               value: ''
             },{
               label: '上班',
-              value: '1'
+              value: 1
             },{
               label: '休假',
-              value: '2'
+              value: 2
             }
           ]
         },{
@@ -61,20 +61,33 @@ export default {
       ],
       tableFeilds: [
         {
-          type: "writerName",
           label: '写手名',
-          prop: "userId",
+          prop: "userName",
           width: 50
+        // },{
+        //   type: "writerName",
+        //   label: '写手名',
+        //   prop: "userId",
+        //   width: 50
         },{
           label: '稿件名',
           prop: "title"
         },{
+          type: "status",
+          label: '订单状态',
+          prop: "status",
+          width: 50,
+
+          btnLabel: '上传稿件',
+          btnStyle: '',
+          btnEvent: 'upload'
+        },{
           label: '字数',
-          prop: "wordsnum",
+          prop: "wordsNum",
           width: 50
         },{
           label: '交稿时间',
-          prop: "deadline",
+          prop: "deadLine",
           width: 50
         },{
           type: "pay_status",
@@ -93,6 +106,9 @@ export default {
           label: '写手应收(元)',
           prop: "money",
           width: 50
+        },{
+          label: '稿件来源号',
+          prop: "sourceId"
         },{
           label: '稿件来源',
           prop: "source",
@@ -135,7 +151,7 @@ export default {
       for (let key in order) {
         if (Object.hasOwnProperty.call(order, key)) {
           let element = order[key];
-          if(element){
+          if(element != undefined && element !== ""){
             this.searchParam[key] = element;
           }
         }
@@ -148,8 +164,10 @@ export default {
       //     this.tableData = res.page
       //   })
       // }else{
-        api_Order.getOrderList3(this.searchParam).then(res => {
-          this.tableData = res.orders
+        api_Order.searchWriter(this.searchParam).then(res => {
+          this.tableData = res.userOrderResults
+        }).catch(e => {
+          this.$message.error(e.msg)
         })
       // }
     },
